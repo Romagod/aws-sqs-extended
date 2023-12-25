@@ -50,6 +50,7 @@ class SQSExtendedSession(boto3.session.Session):
         message_size_threshold: int = (
             SQSExtendedConstants.DEFAULT_MESSAGE_SIZE_THRESHOLD.value),
         s3_bucket_params: Optional[dict] = {'ACL': 'private'},
+        s3_endpoint_url: Optional[str] = None,
     ) -> None:
         """Initialize the SQS extended messaging.
         This method craetes S3 bucket if not exists, initializes a class for
@@ -81,7 +82,10 @@ class SQSExtendedSession(boto3.session.Session):
                 }
 
             s3_bucket_params['Bucket'] = s3_bucket_name
-            s3 = self.client('s3')
+            if s3_endpoint_url is not None:
+                s3 = self.client('s3', endpoint_url=s3_endpoint_url)
+            else:
+                s3 = self.client('s3')
             try:
                 s3.create_bucket(**s3_bucket_params)
                 logger.info(f'bucket {s3_bucket_name} was created')
